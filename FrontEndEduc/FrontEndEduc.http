@@ -1,6 +1,0 @@
-@FrontEndEduc_HostAddress = http://localhost:5299
-
-GET {{FrontEndEduc_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
