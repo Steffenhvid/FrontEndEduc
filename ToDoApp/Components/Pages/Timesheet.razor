@@ -1,6 +1,65 @@
 ﻿@page "/timesheet"
+@using ToDoApp.Application.Interfaces
+@using ToDoApp.Domain.DTO
+@using static ToDoApp.Application.UseCases.Registrations.GetRegistrationsForTimePeriod
+@inject IUseCase<GetRegistrationsForTimePeriodInput, List<WorkItemRegistrationDTO>> _getTimeRegistrations
+
 <h3>Timesheet</h3>
+<div class="container text-left">
+    <div class="row align-items-start">
+        <div class="col">
+            <div class="mb-3">
+                <strong>Start Date</strong>:
+            </div>
+            <div class="mb-3">
+                <input type="date" @bind="@StartDate" @bind:event="onchange" @bind:after="GetTimeRegistrationsOnChange" />
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="mb-3">
+                <strong>End Date</strong>:
+            </div>
+            <div class="mb-3">
+                <InputDate TValue="DateOnly" @bind-Value="@EndDate" @onchange="@GetTimeRegistrationsOnChange" />
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+@if (WorkItemRegistrations != null)
+{
+    <ul>
+        @foreach (var registration in WorkItemRegistrations)
+        {
+            <div>@registration</div>
+        }
+    </ul>
+}
+</div>
 
 @code {
+    private List<WorkItemRegistrationDTO>? WorkItemRegistrations;
+    private GetRegistrationsForTimePeriodInput? input;
+    public DateOnly StartDate;
+    private DateOnly EndDate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        StartDate = new(2024, 1, 1);
+        EndDate = new(2024, 1, 31);
+        await GetTimeRegistrations();
+    }
+
+    private async Task GetTimeRegistrations()
+    {
+        input = new(StartDate, EndDate);
+        WorkItemRegistrations = await _getTimeRegistrations.ExecuteAsync(input);
+    }
+
+    private async Task GetTimeRegistrationsOnChange(ChangeEventArgs args)
+    {
+        await GetTimeRegistrations();
+    }
 
 }
