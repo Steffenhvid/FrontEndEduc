@@ -1,6 +1,22 @@
 ﻿@page "/"
-@using Plk.Blazor.DragDrop
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Bind Event</PageTitle>
 
-<h2>CSS Table</h2>
+<h1>Bind Event Example</h1>
+
+<p>
+    <label>
+        InputValue:
+        <input @bind="InputValue" @bind:event="oninput" />
+    </label>
+
+</p>
+
+<p>
+    <code>InputValue</code>: @InputValue
+</p>
+
+@code {
+    private string? InputValue { get; set; }
+}

@@ -1,65 +1,119 @@
 ﻿@page "/timesheet"
+@rendermode InteractiveServer
 @using ToDoApp.Application.Interfaces
 @using ToDoApp.Domain.DTO
+@using ToDoApp.Components.TimeSheet
+@using System.Globalization
 @using static ToDoApp.Application.UseCases.Registrations.GetRegistrationsForTimePeriod
 @inject IUseCase<GetRegistrationsForTimePeriodInput, List<WorkItemRegistrationDTO>> _getTimeRegistrations
 
 <h3>Timesheet</h3>
 <div class="container text-left">
-    <div class="row align-items-start">
-        <div class="col">
-            <div class="mb-3">
-                <strong>Start Date</strong>:
-            </div>
-            <div class="mb-3">
-                <input type="date" @bind="@StartDate" @bind:event="onchange" @bind:after="GetTimeRegistrationsOnChange" />
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="mb-3">
-                <strong>End Date</strong>:
-            </div>
-            <div class="mb-3">
-                <InputDate TValue="DateOnly" @bind-Value="@EndDate" @onchange="@GetTimeRegistrationsOnChange" />
-            </div>
-        </div>
-    </div>
+    <InputNumber TValue="int" @bind-Value="@Week" @bind-Value:after="GetTimeRegistrationsForWeek" />
 </div>
-<div>
+
 @if (WorkItemRegistrations != null)
 {
-    <ul>
-        @foreach (var registration in WorkItemRegistrations)
+    <H2>Monday - @Start</H2>
+    @foreach (var registration in WorkItemRegistrations)
+    {
+        @if (registration.RegistrationDate.DayOfWeek == DayOfWeek.Monday)
         {
-            <div>@registration</div>
+            <TimeSheetComponent workItem="registration" />
         }
-    </ul>
+    }
+
+    <H2>Tuesday - @Start.AddDays(1)</H2>
+    @foreach (var registration in WorkItemRegistrations)
+    {
+        @if (registration.RegistrationDate.DayOfWeek == DayOfWeek.Tuesday)
+        {
+            <TimeSheetComponent workItem="registration" />
+        }
+    }
+
+    <H2>Wednesday - @Start.AddDays(2)</H2>
+    @foreach (var registration in WorkItemRegistrations)
+    {
+        @if (registration.RegistrationDate.DayOfWeek == DayOfWeek.Wednesday)
+        {
+            <TimeSheetComponent workItem="registration" />
+        }
+    }
+
+    <H2>Thursday - @Start.AddDays(3)</H2>
+    @foreach (var registration in WorkItemRegistrations)
+    {
+        @if (registration.RegistrationDate.DayOfWeek == DayOfWeek.Thursday)
+        {
+            <TimeSheetComponent workItem="registration" />
+        }
+    }
+
+    <H2>Friday - @Start.AddDays(4)</H2>
+    @foreach (var registration in WorkItemRegistrations)
+    {
+        @if (registration.RegistrationDate.DayOfWeek == DayOfWeek.Friday)
+        {
+            <TimeSheetComponent workItem="registration" />
+        }
+    }
+
+    <H2>Saturday - @Start.AddDays(5)</H2>
+    @foreach (var registration in WorkItemRegistrations)
+    {
+        @if (registration.RegistrationDate.DayOfWeek == DayOfWeek.Saturday)
+        {
+            <TimeSheetComponent workItem="registration" />
+        }
+    }
+
+    <H2>Sunday - @Start.AddDays(6)</H2>
+    @foreach (var registration in WorkItemRegistrations)
+    {
+        @if (registration.RegistrationDate.DayOfWeek == DayOfWeek.Sunday)
+        {
+            <TimeSheetComponent workItem="registration" />
+        }
+    }
 }
-</div>
 
 @code {
-    private List<WorkItemRegistrationDTO>? WorkItemRegistrations;
-    private GetRegistrationsForTimePeriodInput? input;
-    public DateOnly StartDate;
-    private DateOnly EndDate;
+    List<WorkItemRegistrationDTO>? WorkItemRegistrations;
+
+    int Week = ISOWeek.GetWeekOfYear(DateTime.UtcNow);
+
+    DateOnly Start;
+    DateOnly End;
 
     protected override async Task OnInitializedAsync()
     {
-        StartDate = new(2024, 1, 1);
-        EndDate = new(2024, 1, 31);
-        await GetTimeRegistrations();
+        await GetTimeRegistrationsForWeek();
     }
 
     private async Task GetTimeRegistrations()
     {
-        input = new(StartDate, EndDate);
-        WorkItemRegistrations = await _getTimeRegistrations.ExecuteAsync(input);
+        WorkItemRegistrations = await _getTimeRegistrations.ExecuteAsync(new(Start, End));
     }
 
-    private async Task GetTimeRegistrationsOnChange(ChangeEventArgs args)
+    private async Task GetTimeRegistrationsForWeek()
     {
+        try
+        {
+            Start = DateOnly.FromDateTime(ISOWeek.ToDateTime(DateTime.UtcNow.Year, Week, DayOfWeek.Monday));
+            End = DateOnly.FromDateTime(ISOWeek.ToDateTime(DateTime.UtcNow.Year, Week, DayOfWeek.Sunday));
+        }
+        catch
+        {
+            Week = ISOWeek.GetWeekOfYear(DateTime.UtcNow);
+            await GetTimeRegistrationsForWeek();
+        }
         await GetTimeRegistrations();
+
     }
 
+    private DayOfWeek GetDayOfWeekFromDate(DateOnly date)
+    {
+        return date.DayOfWeek;
+    }
 }

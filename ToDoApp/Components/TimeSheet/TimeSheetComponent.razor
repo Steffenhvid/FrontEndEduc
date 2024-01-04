@@ -1,0 +1,18 @@
+﻿@using ToDoApp.Domain.DTO
+@rendermode InteractiveServer
+
+<div class="row">
+    <div class="col-auto">
+        <InputDate TValue="DateOnly" @bind-Value="@workItem.RegistrationDate" @bind-Value:event="oninput" /> </div>
+    <div class="col-auto">@workItem.StartTime </div>
+    <div class="col-auto">@workItem.EndTime </div>
+    <div class="col">@workItem.Description </div>
+    <div class="col-auto">@workItem.UserStory </div>
+    <div class="col-auto">@workItem.Task </div>
+    <div class="col-auto">@workItem.Duration </div>
+</div>
+
+@code {
+    [Parameter]
+    public required WorkItemRegistrationDTO workItem { get; set; }
+}
